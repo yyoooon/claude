@@ -92,6 +92,7 @@
       }
     }
   },
+  "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true
 }
