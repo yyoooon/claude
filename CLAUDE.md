@@ -166,6 +166,15 @@ PR 본문 작성 시 **무엇을 바꿨는지 나열에 그치지 말고**, 다�
 ### 1. 스킬/에이전트 선택 의무
 작업 시작 전 적합한 스킬/에이전트를 먼저 선택한다. 직접 처리 금지. 사용 가능한 스킬은 `Skill` 툴 호출 시점에 시스템 프롬프트로 노출되니 거기서 고른다.
 
+### 1-1. node 명령이 `MODULE_NOT_FOUND` 로 즉사하면 — 환경 문제다
+`node`·`npx` 가 **자기 코드를 시작하기도 전에** `Cannot find module ... Require stack: internal/preload` 로 죽으면 프로젝트 문제가 아니다. cmux 가 `NODE_OPTIONS` 에 심어 둔 임시 파일(`$TMPDIR/cmux-claude-node-options/restore-node-options.cjs`)이 macOS 임시폴더 정리로 사라진 것이다.
+
+- **조치**: `settings.json` 의 `env.NODE_OPTIONS` 가 덮어쓰므로 보통 안 겪는다. 그래도 나면 그 명령에만 `NODE_OPTIONS= ` 를 앞에 붙인다.
+- **하지 말 것**: `npm install` 재실행·의존성 의심·제품 코드 디버깅. 원인이 레포 밖이라 무엇을 고쳐도 안 낫는다.
+- **팀원이 겪으면**: 그 레포의 `.claude/settings.json`(커밋됨)에 같은 `env` 를 넣는다.
+
+**Why:** 에러 메시지가 프로젝트 코드를 가리켜 오진을 유도한다. 스택별 스킬(dev-next 등)에 이 대응을 넣지 않는다 — 환경 문제라 특정 스택의 것이 아니고, 명령마다 접두사를 다는 방식으로는 어차피 다 못 막는다.
+
 ### 2. 로직 구현 — TDD + 분리
 - **UI와 비즈니스/계산 로직 분리.** domain 함수는 React 몰라야 함 (props·hooks·JSX 의존 X). UI 레이어는 domain 함수 호출만.
 - **복잡한 순수 함수**(정책 로직, domain.ts 변환, 계산식 등) 구현 시 코드 작성 **전** `superpowers:test-driven-development` 또는 `/tdd` 실행.
